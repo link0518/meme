@@ -21,6 +21,9 @@ const App: React.FC = () => {
   const [cropRows, setCropRows] = useState(4);
   const [cropCols, setCropCols] = useState(6);
 
+  // Generation Mode
+  const [generationMode, setGenerationMode] = useState<'sticker-pack' | 'christmas-hat'>('sticker-pack');
+
   const [state, setState] = useState<StickerGenerationState>({
     isLoading: false,
     error: null,
@@ -76,7 +79,8 @@ const App: React.FC = () => {
 
     try {
       const resultImage = await generateStickerPackOpenAI(selectedFile, {
-        password: passwordInput
+        password: passwordInput,
+        mode: generationMode
       });
 
       setState({ isLoading: false, error: null, generatedImage: resultImage });
@@ -234,6 +238,30 @@ const App: React.FC = () => {
                   上传参考图片
                 </h2>
 
+                {/* Mode Selection */}
+                <div className="flex justify-center mb-6">
+                  <div className="bg-slate-900/50 p-1 rounded-lg inline-flex">
+                    <button
+                      onClick={() => setGenerationMode('sticker-pack')}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${generationMode === 'sticker-pack'
+                        ? 'bg-yellow-500 text-slate-900 shadow-lg'
+                        : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                    >
+                      表情包模式 (Sticker Pack)
+                    </button>
+                    <button
+                      onClick={() => setGenerationMode('christmas-hat')}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${generationMode === 'christmas-hat'
+                        ? 'bg-yellow-500 text-slate-900 shadow-lg'
+                        : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                    >
+                      圣诞帽模式 (Christmas Hat)
+                    </button>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {/* Upload Area */}
                   <div className="space-y-4">
@@ -294,24 +322,37 @@ const App: React.FC = () => {
                   <div className="bg-slate-900/50 rounded-xl p-6 border border-slate-700/50 flex flex-col justify-between">
                     <div>
                       <h3 className="text-lg font-medium text-white mb-4">生成配置说明</h3>
-                      <ul className="space-y-3 text-slate-400 text-sm">
-                        <li className="flex items-start gap-2">
-                          <span className="text-yellow-500 mt-1">●</span>
-                          <span>模型: <strong>自动选择 (Server Configured)</strong></span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-yellow-500 mt-1">●</span>
-                          <span>风格: Q 版, LINE 贴纸风, 手绘彩色</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-yellow-500 mt-1">●</span>
-                          <span>布局: 4x6 表情包合集 (生成 24 个表情)</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-yellow-500 mt-1">●</span>
-                          <span>输出: 自动裁切并打包下载</span>
-                        </li>
-                      </ul>
+                      {generationMode === 'sticker-pack' ? (
+                        <ul className="space-y-3 text-slate-400 text-sm">
+                          <li className="flex items-start gap-2">
+                            <span className="text-yellow-500 mt-1">●</span>
+                            <span>模型: <strong>自动选择 (Server Configured)</strong></span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-yellow-500 mt-1">●</span>
+                            <span>风格: Q 版, LINE 贴纸风, 手绘彩色</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-yellow-500 mt-1">●</span>
+                            <span>布局: 4x6 表情包合集 (生成 24 个表情)</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-yellow-500 mt-1">●</span>
+                            <span>输出: 自动裁切并打包下载</span>
+                          </li>
+                        </ul>
+                      ) : (
+                        <ul className="space-y-3 text-slate-400 text-sm">
+                          <li className="flex items-start gap-2">
+                            <span className="text-yellow-500 mt-1">●</span>
+                            <span>功能: 给角色戴上圣诞帽</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-yellow-500 mt-1">●</span>
+                            <span>输出: 单张图片 (无网格)</span>
+                          </li>
+                        </ul>
+                      )}
                     </div>
 
                     <div className="mt-8 pt-6 border-t border-slate-700/50">
@@ -348,58 +389,60 @@ const App: React.FC = () => {
 
             {/* Content */}
             <div className="flex-1 overflow-hidden p-6 flex flex-col md:flex-row gap-6">
-              {/* Controls Sidebar */}
-              <div className="w-full md:w-64 space-y-6 shrink-0 bg-slate-900/50 p-6 rounded-xl border border-slate-700/50 h-fit">
-                <div>
-                  <h4 className="text-yellow-500 font-medium mb-4 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                    裁切网格设置
-                  </h4>
-                </div>
-                <div className="space-y-4">
+              {/* Controls Sidebar - Only show for Sticker Pack */}
+              {generationMode === 'sticker-pack' && (
+                <div className="w-full md:w-64 space-y-6 shrink-0 bg-slate-900/50 p-6 rounded-xl border border-slate-700/50 h-fit">
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">横向 (列数)</label>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="range" min="1" max="10"
-                        value={cropCols}
-                        onChange={(e) => setCropCols(Number(e.target.value))}
-                        className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-yellow-500"
-                      />
-                      <span className="w-8 text-center text-white font-mono bg-slate-800 rounded px-1">{cropCols}</span>
+                    <h4 className="text-yellow-500 font-medium mb-4 flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                      裁切网格设置
+                    </h4>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">横向 (列数)</label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="range" min="1" max="10"
+                          value={cropCols}
+                          onChange={(e) => setCropCols(Number(e.target.value))}
+                          className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-yellow-500"
+                        />
+                        <span className="w-8 text-center text-white font-mono bg-slate-800 rounded px-1">{cropCols}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">纵向 (行数)</label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="range" min="1" max="10"
+                          value={cropRows}
+                          onChange={(e) => setCropRows(Number(e.target.value))}
+                          className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-yellow-500"
+                        />
+                        <span className="w-8 text-center text-white font-mono bg-slate-800 rounded px-1">{cropRows}</span>
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">纵向 (行数)</label>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="range" min="1" max="10"
-                        value={cropRows}
-                        onChange={(e) => setCropRows(Number(e.target.value))}
-                        className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-yellow-500"
-                      />
-                      <span className="w-8 text-center text-white font-mono bg-slate-800 rounded px-1">{cropRows}</span>
+
+                  <div className="pt-4 border-t border-slate-700 text-xs text-slate-400">
+                    <p className="mb-2">预览框中的黄线显示了分割线。</p>
+                    <div className="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                      <p className="text-yellow-500 font-mono text-center">
+                        总计: <span className="text-lg">{cropRows * cropCols}</span> 张表情
+                      </p>
                     </div>
                   </div>
-                </div>
 
-                <div className="pt-4 border-t border-slate-700 text-xs text-slate-400">
-                  <p className="mb-2">预览框中的黄线显示了分割线。</p>
-                  <div className="bg-slate-800 p-3 rounded-lg border border-slate-700">
-                    <p className="text-yellow-500 font-mono text-center">
-                      总计: <span className="text-lg">{cropRows * cropCols}</span> 张表情
-                    </p>
-                  </div>
+                  {state.error && (
+                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-xs break-all">
+                      {state.error}
+                    </div>
+                  )}
                 </div>
-
-                {state.error && (
-                  <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-xs break-all">
-                    {state.error}
-                  </div>
-                )}
-              </div>
+              )}
 
               {/* Preview Area */}
               <div className="flex-1 bg-black/20 rounded-xl border border-slate-700 flex items-center justify-center p-4 overflow-hidden relative min-h-[500px]">
@@ -410,40 +453,44 @@ const App: React.FC = () => {
                     className="max-w-full max-h-[70vh] object-contain block"
                   />
                   {/* Grid Overlay */}
-                  <div
-                    className="absolute inset-0 grid border-2 border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.3)] pointer-events-none"
-                    style={{
-                      gridTemplateColumns: `repeat(${cropCols}, 1fr)`,
-                      gridTemplateRows: `repeat(${cropRows}, 1fr)`
-                    }}
-                  >
-                    {Array.from({ length: cropRows * cropCols }).map((_, i) => (
-                      <div key={i} className="border border-yellow-500/40 shadow-[inset_0_0_2px_rgba(0,0,0,0.1)]"></div>
-                    ))}
-                  </div>
+                  {generationMode === 'sticker-pack' && (
+                    <div
+                      className="absolute inset-0 grid border-2 border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.3)] pointer-events-none"
+                      style={{
+                        gridTemplateColumns: `repeat(${cropCols}, 1fr)`,
+                        gridTemplateRows: `repeat(${cropRows}, 1fr)`
+                      }}
+                    >
+                      {Array.from({ length: cropRows * cropCols }).map((_, i) => (
+                        <div key={i} className="border border-yellow-500/40 shadow-[inset_0_0_2px_rgba(0,0,0,0.1)]"></div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Footer */}
             <div className="px-6 py-4 bg-slate-900 border-t border-slate-700 flex justify-end">
-              <Button
-                onClick={handleConfirmCropDownload}
-                disabled={isZipping}
-                className="w-full md:w-auto"
-              >
-                {isZipping ? (
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-slate-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                )}
-                {isZipping ? '打包处理中...' : '确认裁切并下载 ZIP'}
-              </Button>
+              {generationMode === 'sticker-pack' && (
+                <Button
+                  onClick={handleConfirmCropDownload}
+                  disabled={isZipping}
+                  className="w-full md:w-auto"
+                >
+                  {isZipping ? (
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-slate-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                  {isZipping ? '打包处理中...' : '确认裁切并下载 ZIP'}
+                </Button>
+              )}
             </div>
           </div>
         )}

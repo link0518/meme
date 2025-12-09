@@ -51,7 +51,7 @@ Do not just copy the original image. Create expressive, stylized stickers.
 // --- Backend API Implementation ---
 export const generateStickerPackOpenAI = async (
   imageFile: File,
-  config: { password: string } // Only password needed now
+  config: { password: string; mode?: 'sticker-pack' | 'christmas-hat' }
 ): Promise<string> => {
 
   const base64Image = await fileToGenerativePart(imageFile);
@@ -66,13 +66,14 @@ export const generateStickerPackOpenAI = async (
       body: JSON.stringify({
         password: config.password,
         imageBase64: base64Image,
-        mimeType: mimeType
+        mimeType: mimeType,
+        mode: config.mode || 'sticker-pack'
       })
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `请求失败 (${response.status})`);
+      throw new Error((errorData as any).error || `请求失败 (${response.status})`);
     }
 
     if (!response.body) throw new Error("API 响应没有内容体");

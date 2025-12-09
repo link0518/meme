@@ -11,7 +11,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     try {
         // 1. Parse Request Body
         const body = await request.json() as any;
-        const { password, imageBase64, mimeType } = body;
+        const { password, imageBase64, mimeType, mode } = body;
 
         // 2. Security Check: Validate Password
         // console.log(`[Auth Debug] Received: '${password}', Expected: '${env.ACCESS_PASSWORD}'`);
@@ -43,7 +43,19 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             }
         }
 
-        const DEFAULT_PROMPT = `
+        let systemPrompt = "";
+
+        if (mode === 'christmas-hat') {
+            systemPrompt = `
+Generate a single image based on the input image.
+Add a Christmas hat to the character's head in the input image.
+Ensure the hat matches the existing art style and lighting.
+Return a single image.
+Do not generate a sticker sheet or grid.
+`;
+        } else {
+            // Default: Sticker Pack
+            systemPrompt = `
 Generate a sticker sheet featuring a Chibi-style, LINE sticker-like character based on the input image.
 The character should maintain key features like headwear from the original image.
 Style: Hand-drawn color illustration.
@@ -52,6 +64,7 @@ Content: Various common chat expressions and fun memes.
 Language: All text must be in Handwritten Simplified Chinese.
 Do not just copy the original image. Create expressive, stylized stickers.
 `;
+        }
 
         // Log the URL for debugging
         // console.log(`[Proxy] Requesting Upstream URL: ${fetchUrl}`);
@@ -63,7 +76,7 @@ Do not just copy the original image. Create expressive, stylized stickers.
                 {
                     role: "user",
                     content: [
-                        { type: "text", text: DEFAULT_PROMPT },
+                        { type: "text", text: systemPrompt },
                         {
                             type: "image_url",
                             image_url: {
