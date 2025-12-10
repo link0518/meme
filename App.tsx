@@ -33,8 +33,10 @@ const App: React.FC = () => {
   // --- Auth Effects & Handlers ---
   useEffect(() => {
     const isAuth = sessionStorage.getItem('is_authenticated');
-    if (isAuth === 'true') {
+    const storedPassword = sessionStorage.getItem('access_password');
+    if (isAuth === 'true' && storedPassword) {
       setIsAuthenticated(true);
+      setPasswordInput(storedPassword);
     }
   }, []);
 
@@ -44,6 +46,7 @@ const App: React.FC = () => {
     if (passwordInput.trim()) {
       setIsAuthenticated(true);
       sessionStorage.setItem('is_authenticated', 'true');
+      sessionStorage.setItem('access_password', passwordInput);
     }
   };
 
